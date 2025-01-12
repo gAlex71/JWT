@@ -1,7 +1,8 @@
 const express = require('express');
-const jsonServer = require('json-server');
+// const jsonServer = require('json-server');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const router = require('./router/router');
 
 require('dotenv').config();
 
@@ -11,12 +12,13 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(cookieParser());
+app.use('/api', router);
 
 // Create a JSON Server instance
-const jsonServerInstance = jsonServer.create();
+// const jsonServerInstance = jsonServer.create();
 // Specify the path to the db.json file
-jsonServerInstance.use(jsonServer.defaults());
-jsonServerInstance.use(jsonServer.router('db.json'));
+// jsonServerInstance.use(jsonServer.defaults());
+// jsonServerInstance.use(jsonServer.router('db.json'));
 
 const start = () => {
 	try {
