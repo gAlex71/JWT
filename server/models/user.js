@@ -1,5 +1,5 @@
-import sequelize from '../db';
-import { DataTypes } from 'sequelize';
+const sequelize = require('../db');
+const { DataTypes } = require('sequelize');
 
 //После описания данной схемы она автоматически добавляется в БД
 const User = sequelize.define('user', {
