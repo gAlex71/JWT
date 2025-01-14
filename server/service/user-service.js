@@ -62,6 +62,40 @@ class UserService {
 			user: userDto,
 		};
 	}
+
+	async logout(refreshToken) {
+		const token = await tokenService.removeToken(refreshToken);
+		return token;
+	}
+
+	async refresh(refreshToken) {
+		if(!refreshToken) {
+			throw ApiError.UnauthorizedError();
+		}
+
+		const userData = tokenService.validateRefreshToken(refreshToken);
+		const tokenFromDB = await tokenService.findToken(refreshToken);
+		if(!userData || !tokenFromDB){
+			throw ApiError.UnauthorizedError();
+		}
+
+		//Обновляем информацию о пользователе и генерируем новую пару ключей
+		const user = await UserModel.findById( userData.id );
+		const userDto = new UserDto(user);
+		const tokens = tokenService.generateTokens({ ...userDto });
+		//Сохраняем refresh токен в базу
+		await tokenService.saveToken(userDto.id, tokens.refreshToken);
+
+		return {
+			...tokens,
+			user: userDto,
+		};
+	}
+
+	async getAllUsers() {
+		const users = await UserModel.find();
+		return users;
+	}
 }
 
 module.exports = new UserService();
