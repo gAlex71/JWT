@@ -4,12 +4,13 @@ const uuid = require('uuid');
 const mailService = require('./mail-service.js');
 const tokenService = require('./token-service.js');
 const UserDto = require('../dto/user-dto.js');
+const ApiError = require('../exceptions/api-error.js');
 
 class UserService {
 	async registration(email, password) {
 		const candidate = await UserModel.findOne({ where: { email } });
 		if (candidate) {
-			throw new Error('Пользователь с таким email уже существует');
+			throw ApiError.BadRequest('Пользователь с таким email уже существует');
 		}
 		const hashPassword = await bcrypt.hash(password, 3);
 		const activationLink = uuid.v4();
@@ -30,7 +31,13 @@ class UserService {
 
 	async activate(activationLink) {
 		//Ищем пользователя в бд по этой ссылке
-		44
+		const user = await UserModel.findOne({ where: { activationLink } });
+		if(!user) {
+			throw ApiError.BadRequest('Неккоректная сылка активации');
+		}
+
+		user.isActivated = true;
+		await user.save();
 	}
 }
 
