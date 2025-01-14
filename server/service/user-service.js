@@ -14,7 +14,7 @@ class UserService {
 		const hashPassword = await bcrypt.hash(password, 3);
 		const activationLink = uuid.v4();
 		const user = await UserModel.create({ email, password: hashPassword, activationLink });
-		await mailService.sendActivationMail(email, activationLink);
+		await mailService.sendActivationMail(email, `${process.env.API_URL}/api/activate/${activationLink}`);
 
 		//Все поля с user нам не нужны поэтому создаем dto
 		const userDto = new UserDto(user);
@@ -26,6 +26,11 @@ class UserService {
 			...tokens,
 			user: userDto,
 		};
+	}
+
+	async activate(activationLink) {
+		//Ищем пользователя в бд по этой ссылке
+		44
 	}
 }
 
