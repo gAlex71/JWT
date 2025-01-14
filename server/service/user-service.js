@@ -39,6 +39,29 @@ class UserService {
 		user.isActivated = true;
 		await user.save();
 	}
+
+	async login(email, password) {
+		const user = await UserModel.findOne({ where: { email } });
+		if(!user) {
+			throw ApiError.BadRequest('Пользователь с таким email не найден');
+		}
+
+		const isPassEquals = await bcrypt.compare(password, user.password);
+		if(!isPassEquals) {
+			throw ApiError.BadRequest('Неверный пароль')
+		}
+
+		//Все поля с user нам не нужны поэтому создаем dto
+		const userDto = new UserDto(user);
+		const tokens = tokenService.generateTokens({ ...userDto });
+		//Сохраняем refresh токен в базу
+		await tokenService.saveToken(userDto.id, tokens.refreshToken);
+
+		return {
+			...tokens,
+			user: userDto,
+		};
+	}
 }
 
 module.exports = new UserService();
